@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Pixel test</title>
+    <!-- Temporary file for pixel testing — remove before production deploy. -->
+    <!-- Meta Pixel Code -->
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return;
+            n = f.fbq = function () {
+                n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+            };
+            if (!f._fbq) f._fbq = n;
+            n.push = n;
+            n.loaded = !0;
+            n.version = '2.0';
+            n.queue = [];
+            t = b.createElement(e);
+            t.async = !0;
+            t.src = v;
+            s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s);
+        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1653943805902830');
+        fbq('track', 'PageView');
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none" alt=""
+             src="https://www.facebook.com/tr?id=1653943805902830&amp;ev=PageView&amp;noscript=1">
+    </noscript>
+    <!-- End Meta Pixel Code -->
+</head>
+<body>
+    <main style="font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem;">
+        <h1>Meta Pixel test</h1>
+        <p>Pixel ID <code>1653943805902830</code> — <strong>PageView</strong> fires on this page load.</p>
+        <p>Check <strong>Events Manager → Test events</strong> (optional test code) or <strong>Overview</strong> after a minute.</p>
+        <p style="color: #666; font-size: 0.9rem;">To try other events later, add e.g. <code>fbq('track', 'Lead');</code> in a button click handler or after <code>PageView</code>.</p>
+    </main>
+</body>
+</html>
