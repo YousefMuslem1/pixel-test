@@ -28,37 +28,155 @@
     </script>
     <noscript>
         <img height="1" width="1" style="display:none" alt=""
-             src="https://www.facebook.com/tr?id=1653943805902830&amp;ev=PageView&amp;noscript=1">
+             src="https://www.facebook.com/tr?id=1653943805902830&ev=PageView&noscript=1">
     </noscript>
     <!-- End Meta Pixel Code -->
+
+    <style>
+        body { font-family: system-ui, sans-serif; }
+        main { max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
+        .event-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        .event-btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: 600;
+            transition: opacity 0.15s;
+        }
+        .event-btn:hover { opacity: 0.85; }
+        .event-btn:active { opacity: 0.7; }
+        .btn-lead        { background: #1877f2; }
+        .btn-viewcontent { background: #6c47ff; }
+        .btn-addtocart   { background: #f5a623; }
+        .btn-purchase    { background: #27ae60; }
+
+        #log {
+            margin-top: 1.5rem;
+            background: #f4f4f4;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            min-height: 3rem;
+            color: #333;
+        }
+        #log .entry { margin: 0.2rem 0; }
+        #log .entry span { font-weight: 700; }
+    </style>
 </head>
 <body>
-    <main style="font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem;">
+    <main>
         <h1>Meta Pixel test</h1>
         <p>Pixel ID <code>1653943805902830</code> — <strong>PageView</strong> fires on this page load.</p>
-        <p>Check <strong>Events Manager → Test events</strong> (optional test code) or <strong>Overview</strong> after a minute.</p>
+        <p>Check <strong>Events Manager → Test events</strong> or <strong>Overview</strong> after a minute.</p>
+
         <p style="color: #666; font-size: 0.9rem;">
-            The <strong>Event Setup Tool</strong> needs at least one <strong>button</strong> or <strong>link</strong> on the page to map “manual” events.
-            <strong>PageView</strong> still fires from the script in <code>&lt;head&gt;</code> — confirm in <strong>Events Manager</strong>, not only in this tool.
+            The <strong>Event Setup Tool</strong> needs at least one <strong>button</strong> or <strong>link</strong>
+            on the page to map "manual" events. <strong>PageView</strong> fires from the script in
+            <code>&lt;head&gt;</code> — confirm in <strong>Events Manager</strong>, not only in this tool.
         </p>
 
-        <p style="margin-top: 1.5rem;">
-            <button type="button" id="demo-lead" style="padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer;">
-                Test: send Lead event (code)
+        <div class="event-grid">
+
+            <!-- Lead -->
+            <button type="button" id="btn-lead" class="event-btn btn-lead">
+                🧪 Lead
             </button>
-        </p>
-        <p>
+
+            <!-- ViewContent -->
+            <button type="button" id="btn-viewcontent" class="event-btn btn-viewcontent">
+                👁 ViewContent
+            </button>
+
+            <!-- AddToCart -->
+            <button type="button" id="btn-addtocart" class="event-btn btn-addtocart">
+                🛒 AddToCart
+            </button>
+
+            <!-- Purchase -->
+            <button type="button" id="btn-purchase" class="event-btn btn-purchase">
+                💳 Purchase
+            </button>
+
+        </div>
+
+        <!-- Live log -->
+        <div id="log"><em style="color:#999;">Events fired will appear here…</em></div>
+
+        <p style="margin-top: 1.5rem;">
             <a href="#more-info" style="color: #1877f2;">Example link for Event Setup Tool</a>
         </p>
         <p id="more-info" style="margin-top: 2rem; color: #666; font-size: 0.9rem;">
-            Anchor target for the link above. You can point the tool at this URL or the button.
+            Anchor target for the link above. You can point the tool at this URL or any button above.
         </p>
     </main>
+
     <script>
-        document.getElementById('demo-lead').addEventListener('click', function () {
-            if (typeof fbq === 'function') {
-                fbq('track', 'Lead');
+        function fire(eventName, params) {
+            if (typeof fbq !== 'function') {
+                log(eventName, 'fbq not loaded!', '#c0392b');
+                return;
             }
+            fbq('track', eventName, params || {});
+            log(eventName, JSON.stringify(params || {}), null);
+        }
+
+        function log(eventName, detail, color) {
+            var box = document.getElementById('log');
+            var first = box.querySelector('em');
+            if (first) first.remove();
+            var d = new Date();
+            var time = d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+            var entry = document.createElement('div');
+            entry.className = 'entry';
+            entry.style.color = color || '#111';
+            entry.innerHTML = time + ' — <span>' + eventName + '</span> ' + detail;
+            box.prepend(entry);
+        }
+
+        // Lead
+        document.getElementById('btn-lead').addEventListener('click', function () {
+            fire('Lead');
+        });
+
+        // ViewContent — sample product payload
+        document.getElementById('btn-viewcontent').addEventListener('click', function () {
+            fire('ViewContent', {
+                content_name: 'Test Product',
+                content_ids: ['SKU-001'],
+                content_type: 'product',
+                value: 29.99,
+                currency: 'EUR'
+            });
+        });
+
+        // AddToCart — sample cart payload
+        document.getElementById('btn-addtocart').addEventListener('click', function () {
+            fire('AddToCart', {
+                content_name: 'Test Product',
+                content_ids: ['SKU-001'],
+                content_type: 'product',
+                value: 29.99,
+                currency: 'EUR'
+            });
+        });
+
+        // Purchase — sample order payload
+        document.getElementById('btn-purchase').addEventListener('click', function () {
+            fire('Purchase', {
+                value: 59.98,
+                currency: 'EUR',
+                content_ids: ['SKU-001', 'SKU-002'],
+                content_type: 'product',
+                num_items: 2
+            });
         });
     </script>
 </body>
