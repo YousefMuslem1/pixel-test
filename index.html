@@ -57,6 +57,8 @@
         .btn-viewcontent { background: #6c47ff; }
         .btn-addtocart   { background: #f5a623; }
         .btn-purchase    { background: #27ae60; }
+        .btn-whatsapp    { background: #0d9488; }
+        .btn-video       { background: #db2777; }
 
         #log {
             margin-top: 1.5rem;
@@ -83,6 +85,13 @@
             <code>&lt;head&gt;</code> — confirm in <strong>Events Manager</strong>, not only in this tool.
         </p>
 
+        <p style="color: #666; font-size: 0.9rem;">
+            The bottom two buttons fire <strong>custom events</strong> with
+            <code>fbq('trackCustom', …)</code> instead of <code>'track'</code>. A custom event can use
+            <strong>any name</strong>; it shows in Events Manager labelled as custom, and you turn it into an
+            optimisable / conversion event by creating a <strong>Custom Conversion</strong> from it.
+        </p>
+
         <div class="event-grid">
 
             <!-- Lead -->
@@ -105,6 +114,16 @@
                 💳 Purchase
             </button>
 
+            <!-- Custom event 1: WhatsAppClick -->
+            <button type="button" id="btn-whatsapp" class="event-btn btn-whatsapp">
+                💬 WhatsAppClick (custom)
+            </button>
+
+            <!-- Custom event 2: VideoComplete -->
+            <button type="button" id="btn-video" class="event-btn btn-video">
+                🎬 VideoComplete (custom)
+            </button>
+
         </div>
 
         <!-- Live log -->
@@ -119,13 +138,24 @@
     </main>
 
     <script>
+        // Standard events  → fbq('track', 'EventName', params)
         function fire(eventName, params) {
+            send('track', eventName, params);
+        }
+
+        // Custom events    → fbq('trackCustom', 'AnyName', params)
+        function fireCustom(eventName, params) {
+            send('trackCustom', eventName, params);
+        }
+
+        function send(method, eventName, params) {
             if (typeof fbq !== 'function') {
                 log(eventName, 'fbq not loaded!', '#c0392b');
                 return;
             }
-            fbq('track', eventName, params || {});
-            log(eventName, JSON.stringify(params || {}), null);
+            fbq(method, eventName, params || {});
+            var isCustom = (method === 'trackCustom');
+            log(eventName, (isCustom ? '[custom] ' : '') + JSON.stringify(params || {}), isCustom ? '#0d9488' : null);
         }
 
         function log(eventName, detail, color) {
@@ -176,6 +206,21 @@
                 content_ids: ['SKU-001', 'SKU-002'],
                 content_type: 'product',
                 num_items: 2
+            });
+        });
+
+        // Custom event 1 — WhatsAppClick (no standard equivalent → trackCustom)
+        document.getElementById('btn-whatsapp').addEventListener('click', function () {
+            fireCustom('WhatsAppClick', {
+                source: 'pixel-test-page'
+            });
+        });
+
+        // Custom event 2 — VideoComplete (no standard equivalent → trackCustom)
+        document.getElementById('btn-video').addEventListener('click', function () {
+            fireCustom('VideoComplete', {
+                video_title: 'Promo 30s',
+                percent: 100
             });
         });
     </script>
