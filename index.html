@@ -57,7 +57,7 @@
         .btn-viewcontent { background: #6c47ff; }
         .btn-addtocart   { background: #f5a623; }
         .btn-purchase    { background: #27ae60; }
-        .btn-whatsapp    { background: #0d9488; }
+        .btn-contact     { background: #0d9488; }
         .btn-video       { background: #db2777; }
 
         #log {
@@ -80,16 +80,9 @@
         <p>Check <strong>Events Manager → Test events</strong> or <strong>Overview</strong> after a minute.</p>
 
         <p style="color: #666; font-size: 0.9rem;">
-            The <strong>Event Setup Tool</strong> needs at least one <strong>button</strong> or <strong>link</strong>
-            on the page to map "manual" events. <strong>PageView</strong> fires from the script in
-            <code>&lt;head&gt;</code> — confirm in <strong>Events Manager</strong>, not only in this tool.
-        </p>
-
-        <p style="color: #666; font-size: 0.9rem;">
-            The bottom two buttons fire <strong>custom events</strong> with
-            <code>fbq('trackCustom', …)</code> instead of <code>'track'</code>. A custom event can use
-            <strong>any name</strong>; it shows in Events Manager labelled as custom, and you turn it into an
-            optimisable / conversion event by creating a <strong>Custom Conversion</strong> from it.
+            All buttons now fire <strong>standard events</strong> with <code>fbq('track', …)</code>.
+            Standard events are recognised by Meta immediately, so they appear in Events Manager and in the
+            <strong>Custom Conversion</strong> event dropdown right away — no approval or blocking step needed.
         </p>
 
         <div class="event-grid">
@@ -114,14 +107,14 @@
                 💳 Purchase
             </button>
 
-            <!-- Custom event 1: WhatsAppClick -->
-            <button type="button" id="btn-whatsapp" class="event-btn btn-whatsapp">
-                💬 WhatsAppClick (custom)
+            <!-- Contact (was WhatsAppClick custom → now standard Contact) -->
+            <button type="button" id="btn-contact" class="event-btn btn-contact">
+                💬 Contact
             </button>
 
-            <!-- Custom event 2: VideoComplete -->
+            <!-- ViewContent variant (was VideoComplete custom → now standard ViewContent) -->
             <button type="button" id="btn-video" class="event-btn btn-video">
-                🎬 VideoComplete (custom)
+                🎬 ViewContent (Video)
             </button>
 
         </div>
@@ -138,14 +131,9 @@
     </main>
 
     <script>
-        // Standard events  → fbq('track', 'EventName', params)
+        // Standard events → fbq('track', 'EventName', params)
         function fire(eventName, params) {
             send('track', eventName, params);
-        }
-
-        // Custom events    → fbq('trackCustom', 'AnyName', params)
-        function fireCustom(eventName, params) {
-            send('trackCustom', eventName, params);
         }
 
         function send(method, eventName, params) {
@@ -154,8 +142,7 @@
                 return;
             }
             fbq(method, eventName, params || {});
-            var isCustom = (method === 'trackCustom');
-            log(eventName, (isCustom ? '[custom] ' : '') + JSON.stringify(params || {}), isCustom ? '#0d9488' : null);
+            log(eventName, JSON.stringify(params || {}), null);
         }
 
         function log(eventName, detail, color) {
@@ -209,18 +196,18 @@
             });
         });
 
-        // Custom event 1 — WhatsAppClick (no standard equivalent → trackCustom)
-        document.getElementById('btn-whatsapp').addEventListener('click', function () {
-            fireCustom('WhatsAppClick', {
-                source: 'pixel-test-page'
+        // Contact — standard event (replaces the old WhatsAppClick custom event)
+        document.getElementById('btn-contact').addEventListener('click', function () {
+            fire('Contact', {
+                content_name: 'WhatsApp Click'
             });
         });
 
-        // Custom event 2 — VideoComplete (no standard equivalent → trackCustom)
+        // ViewContent (Video) — standard event (replaces the old VideoComplete custom event)
         document.getElementById('btn-video').addEventListener('click', function () {
-            fireCustom('VideoComplete', {
-                video_title: 'Promo 30s',
-                percent: 100
+            fire('ViewContent', {
+                content_name: 'Promo 30s',
+                content_type: 'video'
             });
         });
     </script>
