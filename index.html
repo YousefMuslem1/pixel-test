@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meta Pixel test</title>
-    <!-- Temporary file for pixel testing — remove before production deploy. -->
+    <title>Meta Pixel + LinkedIn Insight Tag test</title>
+    <!-- Temporary file for pixel/insight-tag testing — remove before production deploy. -->
+
     <!-- Meta Pixel Code -->
     <script>
         !function (f, b, e, v, n, t, s) {
@@ -35,11 +36,12 @@
     <style>
         body { font-family: system-ui, sans-serif; }
         main { max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
+        h2 { margin-top: 2rem; font-size: 1.1rem; }
         .event-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.75rem;
-            margin-top: 1.5rem;
+            margin-top: 1rem;
         }
         .event-btn {
             padding: 0.6rem 1rem;
@@ -59,7 +61,7 @@
         .btn-purchase    { background: #27ae60; }
         .btn-contact     { background: #0d9488; }
         .btn-video       { background: #db2777; }
-
+        .btn-li          { background: #0a66c2; }
         #log {
             margin-top: 1.5rem;
             background: #f4f4f4;
@@ -75,76 +77,42 @@
 </head>
 <body>
     <main>
-        <h1>Meta Pixel test</h1>
-        <p>Pixel ID <code>1653943805902830</code> — <strong>PageView</strong> fires on this page load.</p>
-        <p>Check <strong>Events Manager → Test events</strong> or <strong>Overview</strong> after a minute.</p>
+        <h1>Meta Pixel + LinkedIn Insight Tag test</h1>
+        <p>Meta Pixel <code>1653943805902830</code> and the LinkedIn Insight Tag both fire
+           <strong>PageView</strong> on load.</p>
 
-        <p style="color: #666; font-size: 0.9rem;">
-            All buttons now fire <strong>standard events</strong> with <code>fbq('track', …)</code>.
-            Standard events are recognised by Meta immediately, so they appear in Events Manager and in the
-            <strong>Custom Conversion</strong> event dropdown right away — no approval or blocking step needed.
-        </p>
-
+        <h2>Meta Pixel events</h2>
         <div class="event-grid">
-
-            <!-- Lead -->
-            <button type="button" id="btn-lead" class="event-btn btn-lead">
-                🧪 Lead
-            </button>
-
-            <!-- ViewContent -->
-            <button type="button" id="btn-viewcontent" class="event-btn btn-viewcontent">
-                👁 ViewContent
-            </button>
-
-            <!-- AddToCart -->
-            <button type="button" id="btn-addtocart" class="event-btn btn-addtocart">
-                🛒 AddToCart
-            </button>
-
-            <!-- Purchase -->
-            <button type="button" id="btn-purchase" class="event-btn btn-purchase">
-                💳 Purchase
-            </button>
-
-            <!-- Contact (was WhatsAppClick custom → now standard Contact) -->
-            <button type="button" id="btn-contact" class="event-btn btn-contact">
-                💬 Contact
-            </button>
-
-            <!-- ViewContent variant (was VideoComplete custom → now standard ViewContent) -->
-            <button type="button" id="btn-video" class="event-btn btn-video">
-                🎬 ViewContent (Video)
-            </button>
-
+            <button type="button" id="btn-lead" class="event-btn btn-lead">🧪 Lead</button>
+            <button type="button" id="btn-viewcontent" class="event-btn btn-viewcontent">👁 ViewContent</button>
+            <button type="button" id="btn-addtocart" class="event-btn btn-addtocart">🛒 AddToCart</button>
+            <button type="button" id="btn-purchase" class="event-btn btn-purchase">💳 Purchase</button>
+            <button type="button" id="btn-contact" class="event-btn btn-contact">💬 Contact</button>
+            <button type="button" id="btn-video" class="event-btn btn-video">🎬 ViewContent (Video)</button>
         </div>
 
-        <!-- Live log -->
-        <div id="log"><em style="color:#999;">Events fired will appear here…</em></div>
+        <h2>LinkedIn conversion</h2>
+        <p style="color:#666; font-size:0.9rem;">
+            Fires a LinkedIn conversion via <code>lintrk('track', { conversion_id: … })</code>.
+            Replace <code>YOUR_CONVERSION_ID</code> below with the numeric ID LinkedIn shows on your
+            conversion (Campaign Manager → Conversions → your conversion). PageView already fires from
+            the tag on load, which is enough to verify the tag itself.
+        </p>
+        <div class="event-grid">
+            <button type="button" id="btn-li-conversion" class="event-btn btn-li">🔗 LinkedIn Conversion</button>
+        </div>
 
-        <p style="margin-top: 1.5rem;">
-            <a href="#more-info" style="color: #1877f2;">Example link for Event Setup Tool</a>
-        </p>
-        <p id="more-info" style="margin-top: 2rem; color: #666; font-size: 0.9rem;">
-            Anchor target for the link above. You can point the tool at this URL or any button above.
-        </p>
+        <div id="log"><em style="color:#999;">Events fired will appear here…</em></div>
     </main>
 
     <script>
-        // Standard events → fbq('track', 'EventName', params)
-        function fire(eventName, params) {
-            send('track', eventName, params);
-        }
-
+        // ---------- Meta Pixel event helpers ----------
+        function fire(eventName, params) { send('track', eventName, params); }
         function send(method, eventName, params) {
-            if (typeof fbq !== 'function') {
-                log(eventName, 'fbq not loaded!', '#c0392b');
-                return;
-            }
+            if (typeof fbq !== 'function') { log(eventName, 'fbq not loaded!', '#c0392b'); return; }
             fbq(method, eventName, params || {});
             log(eventName, JSON.stringify(params || {}), null);
         }
-
         function log(eventName, detail, color) {
             var box = document.getElementById('log');
             var first = box.querySelector('em');
@@ -158,58 +126,56 @@
             box.prepend(entry);
         }
 
-        // Lead
-        document.getElementById('btn-lead').addEventListener('click', function () {
-            fire('Lead');
-        });
-
-        // ViewContent — sample product payload
+        document.getElementById('btn-lead').addEventListener('click', function () { fire('Lead'); });
         document.getElementById('btn-viewcontent').addEventListener('click', function () {
-            fire('ViewContent', {
-                content_name: 'Test Product',
-                content_ids: ['SKU-001'],
-                content_type: 'product',
-                value: 29.99,
-                currency: 'EUR'
-            });
+            fire('ViewContent', { content_name: 'Test Product', content_ids: ['SKU-001'], content_type: 'product', value: 29.99, currency: 'EUR' });
         });
-
-        // AddToCart — sample cart payload
         document.getElementById('btn-addtocart').addEventListener('click', function () {
-            fire('AddToCart', {
-                content_name: 'Test Product',
-                content_ids: ['SKU-001'],
-                content_type: 'product',
-                value: 29.99,
-                currency: 'EUR'
-            });
+            fire('AddToCart', { content_name: 'Test Product', content_ids: ['SKU-001'], content_type: 'product', value: 29.99, currency: 'EUR' });
         });
-
-        // Purchase — sample order payload
         document.getElementById('btn-purchase').addEventListener('click', function () {
-            fire('Purchase', {
-                value: 59.98,
-                currency: 'EUR',
-                content_ids: ['SKU-001', 'SKU-002'],
-                content_type: 'product',
-                num_items: 2
-            });
+            fire('Purchase', { value: 59.98, currency: 'EUR', content_ids: ['SKU-001','SKU-002'], content_type: 'product', num_items: 2 });
         });
-
-        // Contact — standard event (replaces the old WhatsAppClick custom event)
         document.getElementById('btn-contact').addEventListener('click', function () {
-            fire('Contact', {
-                content_name: 'WhatsApp Click'
-            });
+            fire('Contact', { content_name: 'WhatsApp Click' });
+        });
+        document.getElementById('btn-video').addEventListener('click', function () {
+            fire('ViewContent', { content_name: 'Promo 30s', content_type: 'video' });
         });
 
-        // ViewContent (Video) — standard event (replaces the old VideoComplete custom event)
-        document.getElementById('btn-video').addEventListener('click', function () {
-            fire('ViewContent', {
-                content_name: 'Promo 30s',
-                content_type: 'video'
-            });
+        // ---------- LinkedIn conversion fire ----------
+        document.getElementById('btn-li-conversion').addEventListener('click', function () {
+            if (typeof window.lintrk !== 'function') {
+                log('LinkedIn', 'lintrk not loaded!', '#c0392b');
+                return;
+            }
+            // Replace YOUR_CONVERSION_ID with the numeric conversion id from LinkedIn.
+            window.lintrk('track', { conversion_id: YOUR_CONVERSION_ID });
+            log('LinkedIn conversion', 'conversion_id: YOUR_CONVERSION_ID', '#0a66c2');
         });
     </script>
+
+    <!-- LinkedIn Insight Tag — Partner ID 9549226 -->
+    <script type="text/javascript">
+        _linkedin_partner_id = "9549226";
+        window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+        window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+    </script>
+    <script type="text/javascript">
+        (function(l) {
+            if (!l){window.lintrk = function(a,b){window.lintrk.q.push([a,b])};
+            window.lintrk.q=[]}
+            var s = document.getElementsByTagName("script")[0];
+            var b = document.createElement("script");
+            b.type = "text/javascript";b.async = true;
+            b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+            s.parentNode.insertBefore(b, s);
+        })(window.lintrk);
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none;" alt=""
+             src="https://px.ads.linkedin.com/collect/?pid=9549226&fmt=gif" />
+    </noscript>
+    <!-- End LinkedIn Insight Tag -->
 </body>
 </html>
